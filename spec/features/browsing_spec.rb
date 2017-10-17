@@ -1,4 +1,4 @@
-require "rails_helper"
+require "features_helper"
 require "support/omniauth"
 
 feature "Browsing the site:" do
@@ -24,7 +24,7 @@ feature "Browsing the site:" do
 
     context "when there are wishlist items" do
       before do
-        create(:item, :on_a_wishlist, wishlist: dc_general, name: "BatCorgi!")
+        create(:item, :on_a_wishlist, wishlist: dc_general, name: "BatCorgi!", amazon_url: "https://www.amazon.com")
         create(:item, :on_a_wishlist, wishlist: st_josephs, name: "Puzzles")
       end
 
@@ -34,6 +34,17 @@ feature "Browsing the site:" do
         expect(page).to have_text "BatCorgi!"
         expect(page).to have_text "Puzzles"
         expect(page).to have_button "Pledge to Donate"
+      end
+
+      scenario "I can open a new tab to pledge", js: true do
+        visit "/"
+
+        expect(page).to have_text "BatCorgi!"
+
+        new_window = window_opened_by { all('input[value="Pledge to Donate"]').first.click }
+        new_window.close
+
+        expect(page).to have_text "Pledge was successfully created."
       end
 
       scenario "I can see a list of items for a given wishlist" do
